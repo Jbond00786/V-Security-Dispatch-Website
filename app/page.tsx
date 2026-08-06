@@ -1,5 +1,6 @@
 import LiveConsole from "@/components/LiveConsole";
 import FaqAccordion from "@/components/FaqAccordion";
+import CyberBackground from "@/components/CyberBackground";
 
 export default function Home() {
   return (
@@ -72,6 +73,9 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <header className="bg-[#0A1224] text-white pt-36 pb-24 relative overflow-hidden" id="top">
+        {/* Cybernetic Grid & Particles Background Layer */}
+        <CyberBackground />
+
         <div className="wrap grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div>
             <span className="mono text-xs text-blue-400 bg-blue-500/10 border border-blue-400/30 px-3 py-1 rounded-full uppercase tracking-widest inline-block mb-6">
