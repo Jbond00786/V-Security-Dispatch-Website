@@ -51,7 +51,6 @@ export default function LiveConsole() {
   const [guardsOnline, setGuardsOnline] = useState(148);
   const [activePatrols, setActivePatrols] = useState(42);
 
-  // Live Clock & Dynamic Feed Generator
   useEffect(() => {
     const clockInterval = setInterval(() => {
       const now = new Date();
@@ -70,8 +69,6 @@ export default function LiveConsole() {
       };
 
       setEvents((prev) => [newEvent, ...prev.slice(0, 5)]);
-
-      // Fluctuate stats subtly for live effect
       setGuardsOnline((prev) => prev + (Math.random() > 0.5 ? 1 : -1));
       setActivePatrols((prev) => Math.max(35, prev + (Math.random() > 0.5 ? 1 : -1)));
     }, 3200);
@@ -111,33 +108,8 @@ export default function LiveConsole() {
         }}
       />
 
-      {/* FLOATING BLUE PARTICLES */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-blue-400/30 blur-sm"
-            style={{
-              width: Math.random() * 6 + 2,
-              height: Math.random() * 6 + 2,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -40, 0],
-              opacity: [0.2, 0.7, 0.2],
-            }}
-            transition={{
-              duration: Math.random() * 4 + 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-
       {/* GLASS CONTAINER */}
-      <div className="relative bg-[#0A1224]/85 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 text-slate-100 flex flex-col gap-5 border border-white/10">
+      <div className="relative bg-[#0A1224]/85 backdrop-blur-2xl rounded-2xl p-4 sm:p-6 text-slate-100 flex flex-col gap-5 border border-white/10 overflow-hidden">
 
         {/* HEADER BAR */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
@@ -209,9 +181,9 @@ export default function LiveConsole() {
         {/* MIDDLE SECTION: MAIN DISPATCH FEED + RADAR/MAP */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
-          {/* CENTER: DISPATCH LOG CONSOLE */}
-          <div className="lg:col-span-2 bg-slate-950/60 border border-white/10 rounded-xl p-4 flex flex-col justify-between min-h-[320px]">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-3">
+          {/* CENTER: DISPATCH LOG CONSOLE (STRICT HEIGHT LOCK) */}
+          <div className="lg:col-span-2 bg-slate-950/60 border border-white/10 rounded-xl p-4 flex flex-col justify-between h-[340px] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-2 shrink-0">
               <span className="font-mono text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                 Real-Time Operational Feed
@@ -219,18 +191,20 @@ export default function LiveConsole() {
               <span className="text-[10px] font-mono text-slate-500">AUTO-SYNC ENABLED</span>
             </div>
 
-            <div className="space-y-2.5 overflow-hidden">
-              <AnimatePresence initial={false}>
+            {/* FIXED HEIGHT ITEM CONTAINER WITH NO-JUMP ANIMATIONS */}
+            <div className="relative flex-1 overflow-hidden space-y-2">
+              <AnimatePresence mode="popLayout" initial={false}>
                 {events.map((ev) => {
                   const badge = getEventBadge(ev.type);
                   return (
                     <motion.div
                       key={ev.id}
-                      initial={{ opacity: 0, y: -12, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/15 transition-all text-xs"
+                      layout
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/15 transition-all text-xs h-[42px]"
                     >
                       <div className="flex items-center gap-3 truncate">
                         <span className="font-mono text-slate-400 shrink-0 text-[11px]">{ev.time}</span>
@@ -252,18 +226,15 @@ export default function LiveConsole() {
           </div>
 
           {/* RIGHT PANEL: US RADAR MAP WIDGET */}
-          <div className="relative bg-slate-950/60 border border-white/10 rounded-xl p-4 flex flex-col justify-between overflow-hidden min-h-[320px]">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5 z-10">
+          <div className="relative bg-slate-950/60 border border-white/10 rounded-xl p-4 flex flex-col justify-between overflow-hidden h-[340px]">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5 z-10 shrink-0">
               <span className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 National Field Radar
               </span>
               <span className="text-[10px] font-mono text-emerald-400">ACTIVE SWEEP</span>
             </div>
 
-            {/* RADAR CANVAS CONTAINER */}
             <div className="relative flex-1 flex items-center justify-center my-2">
-              
-              {/* RADAR SWEEP LINE */}
               <motion.div
                 className="absolute w-44 h-44 rounded-full border border-blue-500/20"
                 style={{
@@ -273,48 +244,36 @@ export default function LiveConsole() {
                 transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
               />
 
-              {/* CONCENTRIC RADAR RINGS */}
               <div className="absolute w-44 h-44 rounded-full border border-blue-500/20"></div>
               <div className="absolute w-28 h-28 rounded-full border border-blue-500/20"></div>
               <div className="absolute w-12 h-12 rounded-full border border-blue-500/20"></div>
 
-              {/* MOCK MAP GRAPHIC WITH CITY MARKERS */}
               <div className="relative w-full h-36 flex items-center justify-center">
-                
-                {/* Simulated US Map Dot Clusters */}
                 <div className="relative w-48 h-28 opacity-60">
-                  {/* Los Angeles Marker */}
                   <div className="absolute top-12 left-4 group">
                     <span className="absolute -inset-1 rounded-full bg-blue-400 opacity-75 animate-ping"></span>
                     <span className="relative block w-2 h-2 bg-blue-400 rounded-full"></span>
                     <span className="absolute left-3 -top-1 text-[9px] font-mono text-slate-300 opacity-80">LA</span>
                   </div>
-
-                  {/* Texas Marker */}
                   <div className="absolute top-18 left-20">
                     <span className="absolute -inset-1 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
                     <span className="relative block w-2 h-2 bg-emerald-400 rounded-full"></span>
                     <span className="absolute left-3 -top-1 text-[9px] font-mono text-slate-300 opacity-80">TX</span>
                   </div>
-
-                  {/* Chicago Marker */}
                   <div className="absolute top-6 left-28">
                     <span className="relative block w-2 h-2 bg-cyan-400 rounded-full"></span>
                     <span className="absolute left-3 -top-1 text-[9px] font-mono text-slate-300 opacity-80">CHI</span>
                   </div>
-
-                  {/* New York Marker */}
                   <div className="absolute top-8 right-4">
                     <span className="absolute -inset-1 rounded-full bg-blue-400 opacity-75 animate-ping"></span>
                     <span className="relative block w-2 h-2 bg-blue-400 rounded-full"></span>
                     <span className="absolute right-3 -top-1 text-[9px] font-mono text-slate-300 opacity-80">NY</span>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-white/10 pt-2 z-10">
+            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-white/10 pt-2 z-10 shrink-0">
               <span>LAT/LONG: 34.0522° N, 118.2437° W</span>
               <span className="text-blue-400 font-bold">4 ZONES</span>
             </div>
@@ -330,7 +289,6 @@ export default function LiveConsole() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-            
             <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <div>
@@ -370,7 +328,6 @@ export default function LiveConsole() {
                 <div className="text-[10px] font-mono text-slate-400">0 Active</div>
               </div>
             </div>
-
           </div>
         </div>
 
